@@ -1,5 +1,8 @@
 import curses #import the curses library
+import curses.textpad
+import DoublyLinkedCircularList
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
+
 
 
 def paint_title(win,title):                     
@@ -13,10 +16,11 @@ def paint_mycode(win,code):
 def paint_bulk(win):
     win.clear()
     win.border(0) 
-    win.clear()
-    win.border(0) 
     paint_title(win,"BULK LOADING")
     win.addstr(5,20,"↓ Please enter .csv file name ↓")
+    win.addstr(10,15,"________________________________________")
+    win.addstr(11,22,"Press ENTER to end typing")
+    win.refresh()
 
 def paint_userselection(win):
     win.clear()
@@ -48,10 +52,18 @@ def start_userselection(win):
     paint_menu(win)   
 
 def start_bulk(win):
+    path = ""
+    win2 = curses.newwin(1,40,9,15)
+    tb = curses.textpad.Textbox(win2, insert_mode=True)
+    text = tb.edit()
+    path = tb.gather()
+    win.refresh()
+    win.addstr(23,10,"Press ESC to cancel  |  Press ENTER to bulk data")
+    win.refresh()
     key5 = window.getch()
     while key5!=27:
         key5 = window.getch()
-    paint_menu(win)   
+     
     
 stdscr = curses.initscr() #initialize console
 height = 25
@@ -65,19 +77,23 @@ curses.curs_set(0)      #cursor invisible (0)
 window.border(0)
 window.nodelay(True)    #return -1 when no key is pressed
 paint_menu(window)
-key = KEY_RIGHT         #key defaulted to KEY_RIGHT
-while key != 27:                #run program while [ESC] key is not pressed
-    keystroke = window.getch()  #get current key being pressed
-    if keystroke is not  -1:    #key is pressed 
-        key = keystroke
+key = -1
+while key == -1:                #run program while [ESC] key is not pressed
+    key = window.getch()  #get current key being pressed
+   
     if key == 51:
         paint_userselection(window)
         start_userselection(window)
+        key = -1
     elif key == 53:
         paint_bulk(window)
-        start_bulk(window)    
+        window.refresh()        
+        start_bulk(window)
+        key = -1
+        paint_menu(window)  
               
     elif key == 27:      
        curses.endwin() #return terminal to previous state
-       
+    else:
+        key = -1   
 
