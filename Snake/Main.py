@@ -1,16 +1,23 @@
 import curses #import the curses library
 import curses.textpad
+import csv
 import DoublyLinkedCircularList
 from DoublyLinkedCircularList import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
 
 player = "";
 users = ListaCircularDoble()
-users.agregar_final("User 1")
-users.agregar_final("User 2")
-users.agregar_final("User 3")
-users.agregar_final("User 4")
 
+
+def bulk_csv(filename):
+    with open(filename, 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        count = 0
+        for line in csv_reader:
+            if count>0:                
+                users.agregar_final(line[0])
+            count = count + 1
+           
 def paint_title(win,title):                     
     x_start = round((70-len(title))/2)    
     win.addstr(0,x_start,title)           
@@ -113,7 +120,8 @@ def start_bulk(win):
     win2 = curses.newwin(1,40,9,15)
     tb = curses.textpad.Textbox(win2, insert_mode=True)
     text = tb.edit()
-    path = tb.gather()
+    path = "C:\\Snake\\"+tb.gather()
+    path = path[:-1]
     win.refresh()
     count = 22
     while count <= 48:
@@ -124,6 +132,9 @@ def start_bulk(win):
     key5 = -1
     while key5!=27:
         key5 = window.getch()
+        if key5 == 10:
+            bulk_csv(path)
+            key5 = 27
     paint_menu(win)  
     
 stdscr = curses.initscr() #initialize console
