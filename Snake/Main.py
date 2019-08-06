@@ -6,10 +6,10 @@ from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import spec
 
 player = "";
 users = ListaCircularDoble()
-users.agregar_final("Usuario1")
-users.agregar_final("Usuario2")
-users.agregar_final("Usuario3")
-users.agregar_final("Usuario4")
+users.agregar_final("User 1")
+users.agregar_final("User 2")
+users.agregar_final("User 3")
+users.agregar_final("User 4")
 
 def paint_title(win,title):                     
     x_start = round((70-len(title))/2)    
@@ -39,6 +39,7 @@ def paint_userselection(win):
     win.border(0) 
     paint_title(win,"USER SELECTION")
     win.addstr(5,20,"Please select your username")
+    win.addstr(23,10,"Press ESC to cancel  |  Press ENTER to choose username")
     win.refresh()
 
 def paint_scoreboard(win):
@@ -95,6 +96,10 @@ def start_userselection(win):
             paint_userselection(win)
             paint_username(win,str(nodoaux.dato))
             key3 = -1
+        if key3 == 10:
+            player = str(nodoaux.dato)
+            key3 = 27
+        
     paint_menu(win)   
 
 def start_reports(win):
