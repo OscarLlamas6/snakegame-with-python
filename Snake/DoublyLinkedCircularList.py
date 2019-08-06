@@ -64,12 +64,6 @@ class ListaCircularDoble: #Clase Lista Doblemente Enlazada Circular
 
 
 
-lista = ListaCircularDoble()
-lista.agregar_final(1)
-lista.agregar_final(2)
-lista.agregar_final(3)
-lista.imprimir_adelante()
-print("\n")
-lista.imprimir_atras()
+
 
 
