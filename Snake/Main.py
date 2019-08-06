@@ -1,13 +1,14 @@
 import curses #import the curses library
 import curses.textpad
 import csv
+import os
 import DoublyLinkedCircularList
 from DoublyLinkedCircularList import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
 
 player = "";
 users = ListaCircularDoble()
-
+pypath =os.path.dirname(os.path.abspath(__file__))
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -120,7 +121,7 @@ def start_bulk(win):
     win2 = curses.newwin(1,40,9,15)
     tb = curses.textpad.Textbox(win2, insert_mode=True)
     text = tb.edit()
-    path = "C:\\Snake\\"+tb.gather()
+    path = pypath+"\\"+tb.gather()
     path = path[:-1]
     win.refresh()
     count = 22
