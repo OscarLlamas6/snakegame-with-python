@@ -1,9 +1,15 @@
 import curses #import the curses library
 import curses.textpad
 import DoublyLinkedCircularList
+from DoublyLinkedCircularList import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
 
-
+player = "";
+users = ListaCircularDoble()
+users.agregar_final("Usuario1")
+users.agregar_final("Usuario2")
+users.agregar_final("Usuario3")
+users.agregar_final("Usuario4")
 
 def paint_title(win,title):                     
     x_start = round((70-len(title))/2)    
@@ -22,12 +28,25 @@ def paint_bulk(win):
     win.addstr(11,22,"Press ENTER to end typing")
     win.refresh()
 
+def paint_reports(win):
+    win.clear()
+    win.border(0) 
+    paint_title(win,"REPORTS")
+    win.refresh()
+
 def paint_userselection(win):
     win.clear()
     win.border(0) 
     paint_title(win,"USER SELECTION")
-    win.addstr(5,20,"↓ Please select your username ↓")
-    win.refresh()    
+    win.addstr(5,20,"Please select your username")
+    win.refresh()
+
+def paint_scoreboard(win):
+    win.clear()
+    win.border(0) 
+    paint_title(win,"Scoreboard")
+    win.refresh()
+
 
 def paint_menu(win):
     win.clear()
@@ -44,12 +63,45 @@ def paint_menu(win):
     paint_mycode(win,"201602625")
     win.refresh()
     win.timeout(-1)
-    
+
+def paint_username(win, name):
+    username = "<-       "+name+"       ->"
+    x_start = round((70-len(username))/2)
+    win.addstr(10,x_start,username)
+    win.refresh()
+
+def start_scoreboard(win):
+    key2 = -1
+    while key2!=27:
+        key2 = window.getch()
+    paint_menu(win) 
+
 def start_userselection(win):
-    key4 = window.getch()
+    nodoaux = users.primero
+    if nodoaux is not None:
+        paint_username(win,str(nodoaux.dato))        
+    else:
+        win.addstr(10,20,"No hay usuario(s) registrado(s)")
+    key3 = -1
+    while key3!=27:
+        key3 = window.getch()
+        if key3 == KEY_RIGHT:
+            nodoaux = nodoaux.siguiente
+            paint_userselection(win)
+            paint_username(win,str(nodoaux.dato))
+            key3 = -1
+        if key3 == KEY_LEFT:
+            nodoaux = nodoaux.anterior
+            paint_userselection(win)
+            paint_username(win,str(nodoaux.dato))
+            key3 = -1
+    paint_menu(win)   
+
+def start_reports(win):
+    key4 = -1
     while key4!=27:
         key4 = window.getch()
-    paint_menu(win)   
+    paint_menu(win) 
 
 def start_bulk(win):
     path = ""
@@ -58,12 +110,16 @@ def start_bulk(win):
     text = tb.edit()
     path = tb.gather()
     win.refresh()
+    count = 22
+    while count <= 48:
+        win.addstr(11,count," ")
+        count = count + 1
     win.addstr(23,10,"Press ESC to cancel  |  Press ENTER to bulk data")
     win.refresh()
-    key5 = window.getch()
+    key5 = -1
     while key5!=27:
         key5 = window.getch()
-     
+    paint_menu(win)  
     
 stdscr = curses.initscr() #initialize console
 height = 25
@@ -81,19 +137,35 @@ key = -1
 while key == -1:                #run program while [ESC] key is not pressed
     key = window.getch()  #get current key being pressed
    
-    if key == 51:
+    if key == 50:
+        paint_scoreboard(window)
+        window.refresh()
+        start_scoreboard(window)
+        key = -1
+
+    elif key == 51:
         paint_userselection(window)
+        window.refresh()  
         start_userselection(window)
         key = -1
+    
+    elif key == 52:
+        paint_reports(window)
+        window.refresh()
+        start_reports(window)
+        key = -1
+
     elif key == 53:
         paint_bulk(window)
         window.refresh()        
         start_bulk(window)
         key = -1
-        paint_menu(window)  
+
+    elif key == 54:
+        curses.endwin();  #Close curses   
               
     elif key == 27:      
-       curses.endwin() #return terminal to previous state
+       curses.endwin() #Close curses
     else:
         key = -1   
 
