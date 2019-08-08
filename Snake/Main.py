@@ -1,5 +1,6 @@
 import curses #import the curses library
 import curses.textpad
+import random
 import csv
 import os
 import DoublyLinkedCircularList
@@ -17,6 +18,10 @@ pypath =os.path.dirname(os.path.abspath(__file__)) #Relative path of .py file
 snake.agregar_final(10,12)
 snake.agregar_final(10,11)
 snake.agregar_final(10,10)
+snackx = 1
+snacky = 1
+tipo = 1
+new_snack = True
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -105,8 +110,45 @@ def paint_username(win, name):
     win.addstr(10,x_start,username)
     win.refresh()
 
+def check_coordinate():
+    global snake, snackx, snacky
+    xy_exists = False
+    nodotemp = snake.primero
+    while nodotemp is not None:
+        if nodotemp.y == snacky and nodotemp.x == snackx:
+            xy_exists = True
+        nodotemp = nodotemp.siguiente
+    if xy_exists:
+        return True
+    else:
+        return False
+
+def generate_coordinate():
+    global snackx, snacky
+    snacky = random.randint(1,23)
+    snackx = random.randint(1,68)
+    if check_coordinate():
+        generate_coordinate   
+
+def paint_snacks(win):
+    global snackx, snacky, tipo, new_snack
+    if new_snack:
+        win.addch(snacky, snackx,' ')
+        generate_coordinate()
+        probabilidad = random.randint(1,10)
+        if probabilidad<=7:
+            tipo = 1
+        else:
+            tipo = 2
+        new_snack= False
+    if tipo == 1:
+        win.addch(snacky, snacky,'+')
+    elif tipo == 2:
+        win.addch(snacky, snackx,'*')
+
+
 def start_game(win):
-    global snake
+    global snake, score
     headx = 0
     heady = 0
     key1 = KEY_RIGHT
@@ -114,7 +156,7 @@ def start_game(win):
     while nodoaux is not None:
         win.addch(nodoaux.y, nodoaux.x, '#')
         nodoaux = nodoaux.siguiente
-       
+    paint_snacks(win) 
     while key1!=27:
         win.timeout(speed)
         keychange = window.getch()
