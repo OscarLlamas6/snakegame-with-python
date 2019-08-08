@@ -100,7 +100,7 @@ def paint_menu(win):
     win.addstr(pos_y+3,pos_x,"4. Reports")
     win.addstr(pos_y+4,pos_x,"5. Bulk Loading")
     win.addstr(pos_y+5,pos_x,"6. Close Game")
-    paint_mycode(win,"201602625")
+    paint_mycode(win,"201602625") 
     win.refresh()
     win.timeout(-1)
 
@@ -111,7 +111,9 @@ def paint_username(win, name):
     win.refresh()
 
 def check_coordinate():
-    global snake, snackx, snacky
+    global snake
+    global snackx
+    global snacky
     xy_exists = False
     nodotemp = snake.primero
     while nodotemp is not None:
@@ -124,31 +126,26 @@ def check_coordinate():
         return False
 
 def generate_coordinate():
-    global snackx, snacky
+    global snackx
+    global snacky
     snacky = random.randint(1,23)
     snackx = random.randint(1,68)
     if check_coordinate():
         generate_coordinate   
 
 def paint_snacks(win):
-    global snackx, snacky, tipo, new_snack
-    if new_snack:
-        win.addch(snacky, snackx,' ')
-        generate_coordinate()
-        probabilidad = random.randint(1,10)
-        if probabilidad<=7:
-            tipo = 1
-        else:
-            tipo = 2
-        new_snack= False
-    if tipo == 1:
-        win.addch(snacky, snacky,'+')
-    elif tipo == 2:
-        win.addch(snacky, snackx,'*')
+    global snackx
+    global snacky
+    generate_coordinate()
+    win.addch(snacky,snackx,'+')
+    win.refresh()
 
 
-def start_game(win):
-    global snake, score
+def start_game(win): #Method to start game
+    global snake 
+    global score
+    global snackx
+    global snake
     headx = 0
     heady = 0
     key1 = KEY_RIGHT
@@ -156,7 +153,7 @@ def start_game(win):
     while nodoaux is not None:
         win.addch(nodoaux.y, nodoaux.x, '#')
         nodoaux = nodoaux.siguiente
-    paint_snacks(win) 
+    paint_snacks(win)
     while key1!=27:
         win.timeout(speed)
         keychange = window.getch()
@@ -173,8 +170,7 @@ def start_game(win):
             headx = 0
         elif key1 == KEY_DOWN:
             heady = 1
-            headx = 0
-            
+            headx = 0       
         aux = snake.primero
         tempy = 0
         tempx = 0
@@ -188,13 +184,15 @@ def start_game(win):
             if headposx == 69:
                 headposx = 1
             if headposx == 0:
-                headposx = 68
-            win.addch(aux.y,aux.x,' ')
-            win.addch(headposy,headposx,'#')
+                headposx = 68          
+            win.addch(aux.y,aux.x,' ') 
+            win.addch(headposy,headposx,'0')
             tempy = aux.y 
             tempx = aux.x
             aux.y = headposy
             aux.x = headposx
+            if aux.y==snacky and aux.x==snackx:
+                paint_snacks(win)
             aux = aux.siguiente
         while aux is not None:
             win.addch(aux.y,aux.x,' ')
@@ -205,8 +203,7 @@ def start_game(win):
             aux.x = tempx
             tempy = newy
             tempx = newx
-            aux = aux.siguiente
-     
+            aux = aux.siguiente       
         win.refresh()  
     
     paint_menu(win) 
