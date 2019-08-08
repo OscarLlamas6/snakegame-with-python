@@ -4,11 +4,19 @@ import csv
 import os
 import DoublyLinkedCircularList
 from DoublyLinkedCircularList import *
+import DoublyLinkedListV2
+from DoublyLinkedListV2 import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
 
-player = "";
-users = ListaCircularDoble()
-pypath =os.path.dirname(os.path.abspath(__file__))
+player = "" #Username playing
+score = 0 #Score count
+users = ListaCircularDoble()  #List of usernames
+snake = ListaDoble() #Snake body structure handler
+speed = 100 #Timeout paramete(speed)
+pypath =os.path.dirname(os.path.abspath(__file__)) #Relative path of .py file
+snake.agregar_final(10,12)
+snake.agregar_final(10,11)
+snake.agregar_final(10,10)
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -21,7 +29,19 @@ def bulk_csv(filename):
            
 def paint_title(win,title):                     
     x_start = round((70-len(title))/2)    
-    win.addstr(0,x_start,title)           
+    win.addstr(0,x_start,title)
+
+def paint_gametitle(win):
+    global player
+    global score
+    x_start = round((70-len(" SNAKE RELOADED "))/2)
+    win.addstr(0,x_start," SNAKE RELOADED ")
+    user_x = round((68-len(" User: "+player+" ")))
+    win.addstr(0,user_x," User: "+player+" ")
+
+def paint_score(win):
+    win.addstr(0,2," Score:"+str(score)+" ")
+
 
 def paint_mycode(win,code):                  
     x_start = round((70-len(code))/2)    
@@ -40,6 +60,12 @@ def paint_reports(win):
     win.clear()
     win.border(0) 
     paint_title(win,"REPORTS")
+    win.refresh()
+
+def paint_playgame(win):
+    win.clear()
+    win.border(0)
+    paint_gametitle(win)
     win.refresh()
 
 def paint_userselection(win):
@@ -79,6 +105,70 @@ def paint_username(win, name):
     win.addstr(10,x_start,username)
     win.refresh()
 
+def start_game(win):
+    global snake
+    headx = 0
+    heady = 0
+    key1 = KEY_RIGHT
+    nodoaux = snake.primero
+    while nodoaux is not None:
+        win.addch(nodoaux.y, nodoaux.x, '#')
+        nodoaux = nodoaux.siguiente
+       
+    while key1!=27:
+        win.timeout(speed)
+        keychange = window.getch()
+        if keychange is not -1:
+            key1 = keychange
+        if key1 == KEY_RIGHT:
+            heady = 0
+            headx = 1
+        elif key1 == KEY_LEFT:
+            heady = 0
+            headx = -1
+        elif key1 == KEY_UP:
+            heady = -1
+            headx = 0
+        elif key1 == KEY_DOWN:
+            heady = 1
+            headx = 0
+            
+        aux = snake.primero
+        tempy = 0
+        tempx = 0
+        if aux is snake.primero:
+            headposy = aux.y+heady
+            headposx = aux.x+headx
+            if headposy == 24:
+                headposy = 1
+            if headposy == 0:
+                headposy = 23
+            if headposx == 69:
+                headposx = 1
+            if headposx == 0:
+                headposx = 68
+            win.addch(aux.y,aux.x,' ')
+            win.addch(headposy,headposx,'#')
+            tempy = aux.y 
+            tempx = aux.x
+            aux.y = headposy
+            aux.x = headposx
+            aux = aux.siguiente
+        while aux is not None:
+            win.addch(aux.y,aux.x,' ')
+            win.addch(tempy,tempx,'#')
+            newy = aux.y
+            newx = aux.x
+            aux.y = tempy
+            aux.x = tempx
+            tempy = newy
+            tempx = newx
+            aux = aux.siguiente
+     
+        win.refresh()  
+    
+    paint_menu(win) 
+
 def start_scoreboard(win):
     key2 = -1
     while key2!=27:
@@ -86,6 +176,7 @@ def start_scoreboard(win):
     paint_menu(win) 
 
 def start_userselection(win):
+    global player
     nodoaux = users.primero
     if nodoaux is not None:
         paint_username(win,str(nodoaux.dato))        
@@ -105,7 +196,8 @@ def start_userselection(win):
             paint_username(win,str(nodoaux.dato))
             key3 = -1
         if key3 == 10:
-            player = str(nodoaux.dato)
+            if nodoaux is not None:
+                player = str(nodoaux.dato)
             key3 = 27
         
     paint_menu(win)   
@@ -153,26 +245,33 @@ paint_menu(window)
 key = -1
 while key == -1:                #run program while [ESC] key is not pressed
     key = window.getch()  #get current key being pressed
-   
-    if key == 50:
+
+    if key == 49:
+        paint_playgame(window)
+        paint_score(window)
+        window.refresh()
+        start_game(window)
+        key = -1
+
+    elif key == 50:     #Shows scoreboard
         paint_scoreboard(window)
         window.refresh()
         start_scoreboard(window)
         key = -1
 
-    elif key == 51:
+    elif key == 51:   #Starts User selection
         paint_userselection(window)
         window.refresh()  
         start_userselection(window)
         key = -1
     
-    elif key == 52:
+    elif key == 52: #Shows Reports Menu
         paint_reports(window)
         window.refresh()
         start_reports(window)
         key = -1
 
-    elif key == 53:
+    elif key == 53:   #Starts Data Bulk
         paint_bulk(window)
         window.refresh()        
         start_bulk(window)
