@@ -10,7 +10,8 @@ from DoublyLinkedListV2 import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER
 
 player = "" #Variable que almacenara el username del jugador en turno, inicia como cadena vacia
-score = 0 #Contador del score
+score = 0 #Contador del score por nivel
+scoretotal = 0 #Contador del score total
 users = ListaCircularDoble()  #Estructura para almacenar todos los usuarios
 snake = ListaDoble() #Estrcutura para manejar el cuerpo de la snake
 speed = 100 #Parametro para velocidad de la snake
@@ -22,7 +23,7 @@ snackx = 1 #Posicion en x inicial (temporal) para los snacks
 snacky = 1 #Posicion en y inicial (temporal) para los snacks
 tipo = 1 #Tipo inicial de snack (1 es + y 2 es *)
 new_snack = True #Variable que indica si se debe crear otro snack o no (por ejemplo al quitar pausa)
-lvl = 1 #Nivel inicial del juego 
+lvl = 1 #Nivel inicial del juego
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -39,20 +40,23 @@ def paint_title(win,title):
 
 def paint_gametitle(win):
     global player
-    global score
     x_start = round((70-len(" SNAKE RELOADED "))/2)
     win.addstr(0,x_start," SNAKE RELOADED ")
     user_x = round((68-len(" User: "+player+" ")))
     win.addstr(0,user_x," User: "+player+" ")
 
 def paint_score(win):
+    global score
     win.addstr(0,2," Score:"+str(score)+" ")
 
-
+def paint_level(win):
+    global lvl
+    win.addstr(0,13," Level:"+str(lvl)+" ")
 
 def paint_mycode(win,code):                  
     x_start = round((70-len(code))/2)    
     win.addstr(24,x_start,code)    
+
 
 def paint_bulk(win):
     win.clear()
@@ -67,6 +71,13 @@ def paint_reports(win):
     win.clear()
     win.border(0) 
     paint_title(win,"REPORTS")
+    win.addstr(5,17,"↓ Choose the report you want to see ↓")
+    pos_x = 27              
+    pos_y = 9               
+    win.addstr(pos_y,pos_x,"a. Snake Report") 
+    win.addstr(pos_y+1,pos_x,"b. Score Report")  
+    win.addstr(pos_y+2,pos_x,"c. Scoreboard Report")
+    win.addstr(pos_y+3,pos_x,"d. Users Report")
     win.refresh()
 
 def paint_playgame(win):
@@ -145,7 +156,7 @@ def paint_snacks(win):
     if new_snack == True:
         generate_coordinate()
         new_snack = False
-    if probabilidad>6:
+    if probabilidad>8:
         tipo = 2
     else:
         tipo = 1
@@ -161,11 +172,20 @@ def snack_effect(win):
     global snacky
     global snackx
     global score
+    global scoretotal
+    global lvl
+    global speed
     xtemp = 0
     ytemp = 0
     if tipo == 1:
         score = score + 1
+        if score == 15:
+            scoretotal = scoretotal + score
+            score = 0
+            lvl = lvl + 1
+            speed = speed - 10
         paint_score(win)
+        paint_level(win)
         snake.agregar_final(snacky,snackx)        
     if tipo == 2:
         if score != 0:
@@ -278,14 +298,37 @@ def start_userselection(win):
         if key3 == 10:
             if nodoaux is not None:
                 player = str(nodoaux.dato)
-            key3 = 27
-        
+            key3 = 27       
     paint_menu(win)   
+
+def snake_report():
+    pass
+
+def score_report():
+    pass
+
+def scoreboard_report():
+    pass
+
+def users_report():
+    pass
 
 def start_reports(win):
     key4 = -1
     while key4!=27:
         key4 = window.getch()
+        if key4 == 97:
+            snake_report()
+            key4 = -1
+        if key4 == 98:
+            score_report()
+            key4 = -1
+        if key4 == 99:
+            scoreboard_report()
+            key4 = -1
+        if key4 == 100:
+            users_report()
+            key4 = -1        
     paint_menu(win) 
 
 def start_bulk(win):
@@ -329,6 +372,7 @@ while key == -1:                #run program while [ESC] key is not pressed
     if key == 49:
         paint_playgame(window)
         paint_score(window)
+        paint_level(window)
         window.refresh()
         start_game(window)
         key = -1
