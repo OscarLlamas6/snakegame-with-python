@@ -302,7 +302,39 @@ def start_userselection(win):
     paint_menu(win)   
 
 def snake_report():
-    pass
+    global snake
+    global pypath
+    urldot = pypath+'\\SnakeReport.dot'
+    urlpng = pypath+'\\SnakeReport.png'
+    if snake.primero is None:               
+        print('The list is empty')     
+    else:
+        f = open(urldot,'w')
+        f.write('digraph SnakeReport{\n')
+        f.write('node [shape=record];\n')
+        f.write('rankdir=LR;\n')
+        temp = snake.primero
+        count = 0
+        limit = 0
+        f.write('node{} [label=\"{{ null }}\"];\n'.format(str(count)))
+        while temp is not None:
+            count+=1
+            f.write('node{} [label=\"{{ |({},{})| }}\"];\n'.format(str(count),str(temp.x),str(temp.y)))           
+            temp = temp.siguiente
+        f.write('node{} [label=\"{{ null }}\"];\n'.format(str(count+1)))
+        limit = count
+        count = 0
+        while count < limit:
+            f.write('node{} -> node{} [dir=back];\n'.format(str(count),str(count+1)))
+            count = count + 1
+        count = 1
+        while count < limit+1:
+            f.write('node{} -> node{};\n'.format(str(count),str(count+1)))
+            count = count + 1
+        f.write('}')
+        f.close()
+        os.system('dot {} -Tpng -o {}'.format(urldot,urlpng))
+        os.startfile(urlpng,'open')
 
 def score_report():
     pass
