@@ -47,7 +47,6 @@ def paint_gametitle(win):
 def paint_score(win):
     win.addstr(0,2," Score:"+str(score)+" ")
 
-
 def paint_mycode(win,code):                  
     x_start = round((70-len(code))/2)    
     win.addstr(24,x_start,code)    
@@ -86,7 +85,6 @@ def paint_scoreboard(win):
     win.border(0) 
     paint_title(win,"Scoreboard")
     win.refresh()
-
 
 def paint_menu(win):
     win.clear()
@@ -136,9 +134,40 @@ def generate_coordinate():
 def paint_snacks(win):
     global snackx
     global snacky
-    generate_coordinate()
-    win.addch(snacky,snackx,'+')
+    global tipo
+    global new_snack
+    probabilidad = 0
+    tipo = random.randint(1,2)
+    probabilidad = random.randint(1,10)
+    if new_snack == True:
+        generate_coordinate()
+        new_snack = False
+    if probabilidad>6:
+        tipo = 2
+    else:
+        tipo = 1
+    if tipo == 1:
+        win.addch(snacky,snackx,'+')
+    if tipo == 2:
+        win.addch(snacky,snackx,'*')
     win.refresh()
+
+def snack_effect(win):
+    global snake
+    global tipo
+    global snacky
+    global snackx
+    global score
+    if tipo == 1:
+        score = score + 1
+        paint_score(win)
+        
+    if tipo == 2:
+        if score != 0:
+            score = score - 1
+        paint_score(win)
+    win.refresh()
+
 
 
 def start_game(win): #Method to start game
@@ -146,6 +175,7 @@ def start_game(win): #Method to start game
     global score
     global snackx
     global snake
+    global new_snack
     headx = 0
     heady = 0
     key1 = KEY_RIGHT
@@ -192,6 +222,8 @@ def start_game(win): #Method to start game
             aux.y = headposy
             aux.x = headposx
             if aux.y==snacky and aux.x==snackx:
+                snack_effect(win)
+                new_snack = True
                 paint_snacks(win)
             aux = aux.siguiente
         while aux is not None:
