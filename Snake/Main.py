@@ -1,4 +1,4 @@
-import curses #import the curses library
+import curses
 import curses.textpad
 import random
 import csv
@@ -7,21 +7,22 @@ import DoublyLinkedCircularList
 from DoublyLinkedCircularList import *
 import DoublyLinkedListV2
 from DoublyLinkedListV2 import *
-from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER #import special KEYS from the curses library
+from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER
 
-player = "" #Username playing
-score = 0 #Score count
-users = ListaCircularDoble()  #List of usernames
-snake = ListaDoble() #Snake body structure handler
-speed = 100 #Timeout paramete(speed)
-pypath =os.path.dirname(os.path.abspath(__file__)) #Relative path of .py file
-snake.agregar_final(10,12)
-snake.agregar_final(10,11)
-snake.agregar_final(10,10)
-snackx = 1
-snacky = 1
-tipo = 1
-new_snack = True
+player = "" #Variable que almacenara el username del jugador en turno, inicia como cadena vacia
+score = 0 #Contador del score
+users = ListaCircularDoble()  #Estructura para almacenar todos los usuarios
+snake = ListaDoble() #Estrcutura para manejar el cuerpo de la snake
+speed = 100 #Parametro para velocidad de la snake
+pypath =os.path.dirname(os.path.abspath(__file__)) #Path relativo del archivo .py
+snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
+snake.agregar_final(10,11) #segunda parte del cuerpo de la snake 2/3
+snake.agregar_final(10,10) #tercera parte del cuerpo de la snake 3/3
+snackx = 1 #Posicion en x inicial (temporal) para los snacks
+snacky = 1 #Posicion en y inicial (temporal) para los snacks
+tipo = 1 #Tipo inicial de snack (1 es + y 2 es *)
+new_snack = True #Variable que indica si se debe crear otro snack o no (por ejemplo al quitar pausa)
+lvl = 1 #Nivel inicial del juego 
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -46,6 +47,8 @@ def paint_gametitle(win):
 
 def paint_score(win):
     win.addstr(0,2," Score:"+str(score)+" ")
+
+
 
 def paint_mycode(win,code):                  
     x_start = round((70-len(code))/2)    
@@ -158,14 +161,20 @@ def snack_effect(win):
     global snacky
     global snackx
     global score
+    xtemp = 0
+    ytemp = 0
     if tipo == 1:
         score = score + 1
         paint_score(win)
-        
+        snake.agregar_final(snacky,snackx)        
     if tipo == 2:
         if score != 0:
+            ytemp = snake.ultimo.y 
+            xtemp = snake.ultimo.x 
             score = score - 1
-        paint_score(win)
+            snake.eliminar_ultimo()
+            win.addch(ytemp, xtemp,' ')
+        paint_score(win)        
     win.refresh()
 
 
