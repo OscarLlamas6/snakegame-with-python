@@ -22,14 +22,13 @@ scorestack = StackList() #Estructura para almacenar el score (Pila)
 sbqueue = QueueList() #Estructura para almacenar el scoreboard (Cola)
 speed = 100 #Parametro para velocidad de la snake
 pypath =os.path.dirname(os.path.abspath(__file__)) #Path relativo del archivo .py
-snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
-snake.agregar_final(10,11) #segunda parte del cuerpo de la snake 2/3
-snake.agregar_final(10,10) #tercera parte del cuerpo de la snake 3/3
 snackx = 1 #Posicion en x inicial (temporal) para los snacks
 snacky = 1 #Posicion en y inicial (temporal) para los snacks
 tipo = 1 #Tipo inicial de snack (1 es + y 2 es *)
 new_snack = True #Variable que indica si se debe crear otro snack o no (por ejemplo al quitar pausa)
 lvl = 1 #Nivel inicial del juego
+newgame = True
+gameover = False
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -85,6 +84,16 @@ def paint_reports(win):
     win.addstr(pos_y+2,pos_x,"c. Scoreboard Report")
     win.addstr(pos_y+3,pos_x,"d. Users Report")
     win.refresh()
+
+def paint_gameover(win):
+    global scoretotal
+    win.clear()
+    win.border(0)
+    win.addstr(5,30,'GAME OVER')
+    win.addstr(10,30,'Score: '+str(scoretotal))
+    win.addstr(23,18,"Press ENTER to return to the menu")
+    win.refresh()
+
 
 def paint_playgame(win):
     win.clear()
@@ -199,8 +208,8 @@ def snack_effect(win):
     ytemp = 0
     if tipo == 1:
         score = score + 1
+        scoretotal = scoretotal + 1
         if score == 15:
-            scoretotal = scoretotal + score
             score = 0
             lvl = lvl + 1
             speed = speed - 10
@@ -222,14 +231,27 @@ def snack_effect(win):
 
 
 def start_game(win): #Method to start game
-    global snake 
-    global score
+    global snake
     global snackx
     global snake
     global new_snack
+    global newgame
+    global gameover
+    global speed
+    global scorestack
+    global sbqueue
     headx = 0
     heady = 0
     key1 = KEY_RIGHT
+    if newgame:
+        scorestack.head = None
+        sbqueue.head = None
+        snake.primero = None
+        snake.ultimo = None
+        snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
+        snake.agregar_final(10,11) #segunda parte del cuerpo de la snake 2/3
+        snake.agregar_final(10,10) #tercera parte del cuerpo de la snake 3/3
+        newgame = False
     nodoaux = snake.primero
     while nodoaux is not None:
         win.addch(nodoaux.y, nodoaux.x, '#')
@@ -272,10 +294,14 @@ def start_game(win): #Method to start game
             tempx = aux.x
             aux.y = headposy
             aux.x = headposx
-            if aux.y==snacky and aux.x==snackx:
-                snack_effect(win)
-                new_snack = True
-                paint_snacks(win)
+            if check_gameover():
+                gameover = True
+                key1 = 27
+            else:
+                if aux.y==snacky and aux.x==snackx:
+                    snack_effect(win)
+                    new_snack = True
+                    paint_snacks(win)                      
             aux = aux.siguiente
         while aux is not None:
             win.addch(aux.y,aux.x,' ')
@@ -288,8 +314,8 @@ def start_game(win): #Method to start game
             tempx = newx
             aux = aux.siguiente       
         win.refresh()  
-    
-    paint_menu(win) 
+    if gameover == False:
+        paint_menu(win) 
 
 def start_scoreboard(win):
     key2 = -1
@@ -461,7 +487,22 @@ def start_bulk(win):
         if key5 == 10:
             bulk_csv(path)
             key5 = 27
-    paint_menu(win)  
+    paint_menu(win)
+
+def start_gameover(win):
+    global newgame
+    global gameover
+    global score
+    global scoretotal
+    key6 = -1
+    while key6!=10:
+        key6 = window.getch()
+    gameover = False
+    scoretotal = 0
+    score = 0
+    speed = 100
+    newgame = True
+    paint_menu(win) 
     
 stdscr = curses.initscr() #initialize console
 height = 25
@@ -512,8 +553,14 @@ while key == -1:                #run program while [ESC] key is not pressed
         key = -1
 
     elif key == 54:
-        curses.endwin();  #Close curses   
-              
+        curses.endwin() #Close curses   
+
+    elif gameover == True:
+        paint_gameover(window)
+        window.refresh()
+        start_gameover(window)
+        key = -1
+
     elif key == 27:      
        curses.endwin() #Close curses
     else:
