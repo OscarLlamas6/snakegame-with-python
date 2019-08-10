@@ -343,7 +343,41 @@ def scoreboard_report():
     pass
 
 def users_report():
-    pass
+    global users
+    global pypath
+    urldot = pypath+'\\UsersReport.dot'
+    urlpng = pypath+'\\UsersReport.png'
+    if users.primero is None:               
+        print('The list is empty')     
+    else:
+        f = open(urldot,'w')
+        f.write('digraph UsersReport{\n')
+        f.write('node [shape=record];\n')
+        f.write('rankdir=LR;\n')
+        temp = users.primero
+        count = 0
+        limit = 0
+        while temp is not users.ultimo:           
+            f.write('node{} [label=\"{{ |({})| }}\"];\n'.format(str(count),temp.dato))
+            count+=1          
+            temp = temp.siguiente
+        f.write('node{} [label=\"{{ |({})| }}\"];\n'.format(str(count),temp.dato))
+        limit = count
+        count = 0
+        while count < limit:
+            f.write('node{} -> node{} [dir=back];\n'.format(str(count),str(count+1)))
+            count = count + 1
+        count = 0
+        while count < limit:
+            f.write('node{} -> node{};\n'.format(str(count),str(count+1)))
+            count = count + 1
+        count = 0
+        f.write('node{} -> node{} [dir=back];\n'.format(str(count),str(limit)))
+        f.write('node{} -> node{};\n'.format(str(count),str(limit)))
+        f.write('}')
+        f.close()
+        os.system('dot {} -Tpng -o {}'.format(urldot,urlpng))
+        os.startfile(urlpng,'open')
 
 def start_reports(win):
     key4 = -1
