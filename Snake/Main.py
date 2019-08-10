@@ -222,6 +222,7 @@ def snack_effect(win):
             ytemp = snake.ultimo.y 
             xtemp = snake.ultimo.x 
             score = score - 1
+            scoretotal = scoretotal - 1
             snake.eliminar_ultimo()
             win.addch(ytemp, xtemp,' ')
         paint_score(win)
@@ -245,7 +246,6 @@ def start_game(win): #Method to start game
     key1 = KEY_RIGHT
     if newgame:
         scorestack.head = None
-        sbqueue.head = None
         snake.primero = None
         snake.ultimo = None
         snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
@@ -409,7 +409,34 @@ def score_report():
         os.startfile(urlpng,'open')
 
 def scoreboard_report():
-    pass
+    global sbqueue
+    global pypath
+    urldot = pypath+'\\ScoreboardReport.dot'
+    urlpng = pypath+'\\ScoreboardReport.png'
+    if sbqueue.head is None:               
+        print('The queue is empty')     
+    else:
+        f = open(urldot,'w')
+        f.write('digraph SnakeReport{\n')
+        f.write('node [shape=record];\n')
+        f.write('rankdir=LR;\n')
+        temp = sbqueue.head
+        count = 0
+        limit = 0
+        f.write('node{} [label=\"{{ null }}\"];\n'.format(str(count)))
+        while temp is not None:
+            count+=1 
+            f.write('node{} [label=\"{{({},{})| }}\"];\n'.format(str(count),temp.username,str(temp.score)))          
+            temp = temp.next           
+        limit = count
+        while limit > 1:
+            f.write('node{} -> node{};\n'.format(str(limit),str(limit-1)))
+            limit = limit - 1
+        f.write('node1 -> node0;\n'.format(str(limit),str(limit-1)))
+        f.write('}')
+        f.close()
+        os.system('dot {} -Tpng -o {}'.format(urldot,urlpng))
+        os.startfile(urlpng,'open')
 
 def users_report():
     global users
@@ -494,12 +521,20 @@ def start_gameover(win):
     global gameover
     global score
     global scoretotal
+    global sbqueue
+    global player
+    global speed
     key6 = -1
     while key6!=10:
         key6 = window.getch()
     gameover = False
+    if sbqueue.size<10:
+        sbqueue.enqueue(player,scoretotal)
+    else:
+        sbqueue.dequeue()
+        sbqueue.enqueue(player,scoretotal)
     scoretotal = 0
-    score = 0
+    score = 0    
     speed = 100
     newgame = True
     paint_menu(win) 
