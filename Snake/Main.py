@@ -9,6 +9,8 @@ import DoublyLinkedList
 from DoublyLinkedList import *
 import Stack
 from Stack import *
+import Queue
+from Queue import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER
 
 player = "" #Variable que almacenara el username del jugador en turno, inicia como cadena vacia
@@ -17,6 +19,7 @@ scoretotal = 0 #Contador del score total
 users = ListaCircularDoble()  #Estructura para almacenar todos los usuarios (Lista circular doble)
 snake = ListaDoble() #Estrcutura para manejar el cuerpo de la snake (Lista doble)
 scorestack = StackList() #Estructura para almacenar el score (Pila)
+sbqueue = QueueList() #Estructura para almacenar el scoreboard (Cola)
 speed = 100 #Parametro para velocidad de la snake
 pypath =os.path.dirname(os.path.abspath(__file__)) #Path relativo del archivo .py
 snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
@@ -136,6 +139,19 @@ def check_coordinate():
             xy_exists = True
         nodotemp = nodotemp.siguiente
     if xy_exists:
+        return True
+    else:
+        return False
+
+def check_gameover():
+    global snake
+    gameover = False
+    nodotemp = snake.primero.siguiente
+    while nodotemp is not None:
+        if snake.primero.y == nodotemp.y and snake.primero.x == nodotemp.x:
+            gameover = True
+        nodotemp = nodotemp.siguiente
+    if gameover:
         return True
     else:
         return False
