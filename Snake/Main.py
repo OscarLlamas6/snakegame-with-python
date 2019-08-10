@@ -5,15 +5,18 @@ import csv
 import os
 import DoublyLinkedCircularList
 from DoublyLinkedCircularList import *
-import DoublyLinkedListV2
-from DoublyLinkedListV2 import *
+import DoublyLinkedList
+from DoublyLinkedList import *
+import Stack
+from Stack import *
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER
 
 player = "" #Variable que almacenara el username del jugador en turno, inicia como cadena vacia
 score = 0 #Contador del score por nivel
 scoretotal = 0 #Contador del score total
-users = ListaCircularDoble()  #Estructura para almacenar todos los usuarios
-snake = ListaDoble() #Estrcutura para manejar el cuerpo de la snake
+users = ListaCircularDoble()  #Estructura para almacenar todos los usuarios (Lista circular doble)
+snake = ListaDoble() #Estrcutura para manejar el cuerpo de la snake (Lista doble)
+scorestack = StackList() #Estructura para almacenar el score (Pila)
 speed = 100 #Parametro para velocidad de la snake
 pypath =os.path.dirname(os.path.abspath(__file__)) #Path relativo del archivo .py
 snake.agregar_final(10,12) #primera parte del cuerpo de la snake 1/3
@@ -175,6 +178,7 @@ def snack_effect(win):
     global scoretotal
     global lvl
     global speed
+    global scorestack
     xtemp = 0
     ytemp = 0
     if tipo == 1:
@@ -186,7 +190,8 @@ def snack_effect(win):
             speed = speed - 10
         paint_score(win)
         paint_level(win)
-        snake.agregar_final(snacky,snackx)        
+        snake.agregar_final(snacky,snackx)
+        scorestack.push(snacky,snackx)      
     if tipo == 2:
         if score != 0:
             ytemp = snake.ultimo.y 
@@ -194,7 +199,8 @@ def snack_effect(win):
             score = score - 1
             snake.eliminar_ultimo()
             win.addch(ytemp, xtemp,' ')
-        paint_score(win)        
+        paint_score(win)
+        scorestack.pop()        
     win.refresh()
 
 
@@ -337,7 +343,28 @@ def snake_report():
         os.startfile(urlpng,'open')
 
 def score_report():
-    pass
+    global scorestack
+    global pypath
+    urldot = pypath+'\\ScoreReport.dot'
+    urlpng = pypath+'\\ScoreReport.png'
+    if snake.primero is None:               
+        print('The list is empty')     
+    else:
+        f = open(urldot,'w')
+        f.write('digraph SnakeReport{\n')
+        f.write('node [shape=record];\n')
+        f.write('rankdir=LR;\n')
+        temp = scorestack.head
+        command = 'stack1 [label=\"'
+        while temp is not None:
+            command= command+'|({},{})'.format(str(temp.x),str(temp.y))          
+            temp = temp.next
+        command = command + '\"];'
+        f.write(command)       
+        f.write('}')
+        f.close()
+        os.system('dot {} -Tpng -o {}'.format(urldot,urlpng))
+        os.startfile(urlpng,'open')
 
 def scoreboard_report():
     pass
@@ -378,6 +405,7 @@ def users_report():
         f.close()
         os.system('dot {} -Tpng -o {}'.format(urldot,urlpng))
         os.startfile(urlpng,'open')
+        
 
 def start_reports(win):
     key4 = -1
