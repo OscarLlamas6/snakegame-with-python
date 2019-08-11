@@ -15,5 +15,8 @@ class StackList: # Creamos la stack_list
         self.head = node(y=y,x=x, next=self.head)
 
     def pop(self):
-        aux = self.head.next
-        self.head = aux
+        if self.head is not None:
+            if self.head.next is not None:
+                aux = self.head.next
+                self.head = aux
+        

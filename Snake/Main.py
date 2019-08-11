@@ -29,6 +29,7 @@ new_snack = True #Variable que indica si se debe crear otro snack o no (por ejem
 lvl = 1 #Nivel inicial del juego
 newgame = True
 gameover = False
+nouser = False
 
 def bulk_csv(filename):
     with open(filename, 'r') as csv_file:
@@ -94,6 +95,14 @@ def paint_gameover(win):
     win.addstr(23,18,"Press ENTER to return to the menu")
     win.refresh()
 
+def paint_nouser(win):
+    win.clear()
+    win.border(0)
+    win.addstr(5,10,'SELECCIONA TU USUARIO ANTES DE INICIAR EL JUEGO')
+    win.addstr(10,18,"1. Crear nuevo usuario")
+    win.addstr(11,18,"2. Elegir usuario existente")
+    win.addstr(23,18,"Press ESC to return to the menu")
+    win.refresh()
 
 def paint_playgame(win):
     win.clear()
@@ -321,33 +330,36 @@ def start_scoreboard(win):
     key2 = -1
     while key2!=27:
         key2 = window.getch()
-    paint_menu(win) 
 
 def start_userselection(win):
     global player
     nodoaux = users.primero
     if nodoaux is not None:
-        paint_username(win,str(nodoaux.dato))        
+        paint_username(win,str(nodoaux.dato))
+        key3 = -1
+        while key3!=27:
+            key3 = win.getch()
+            if key3 == KEY_RIGHT:
+                nodoaux = nodoaux.siguiente
+                paint_userselection(win)
+                paint_username(win,str(nodoaux.dato))
+                key3 = -1
+            if key3 == KEY_LEFT:
+                nodoaux = nodoaux.anterior
+                paint_userselection(win)
+                paint_username(win,str(nodoaux.dato))
+                key3 = -1
+            if key3 == 10:
+                if nodoaux is not None:
+                    player = str(nodoaux.dato)
+                    key3 = 27          
     else:
         win.addstr(10,20,"No hay usuario(s) registrado(s)")
-    key3 = -1
-    while key3!=27:
-        key3 = window.getch()
-        if key3 == KEY_RIGHT:
-            nodoaux = nodoaux.siguiente
-            paint_userselection(win)
-            paint_username(win,str(nodoaux.dato))
-            key3 = -1
-        if key3 == KEY_LEFT:
-            nodoaux = nodoaux.anterior
-            paint_userselection(win)
-            paint_username(win,str(nodoaux.dato))
-            key3 = -1
-        if key3 == 10:
-            if nodoaux is not None:
-                player = str(nodoaux.dato)
-            key3 = 27       
-    paint_menu(win)   
+        key3 = -1
+        while key3!=27:
+            key3 = win.getch()            
+            if key3 == 10:           
+                key3 = 27 
 
 def snake_report():
     global snake
@@ -492,7 +504,6 @@ def start_reports(win):
         if key4 == 100:
             users_report()
             key4 = -1        
-    paint_menu(win) 
 
 def start_bulk(win):
     path = ""
@@ -513,8 +524,7 @@ def start_bulk(win):
         key5 = window.getch()
         if key5 == 10:
             bulk_csv(path)
-            key5 = 27
-    paint_menu(win)
+            key5 = 27    
 
 def start_gameover(win):
     global newgame
@@ -537,7 +547,18 @@ def start_gameover(win):
     score = 0    
     speed = 100
     newgame = True
-    paint_menu(win) 
+    paint_menu(win)
+
+def start_nouser(win):
+    key7 = -1
+    while key7!=27:
+        key7 = win.getch()
+        if key7 == 50:
+            paint_userselection(win)
+            win.refresh()  
+            start_userselection(win)
+            key7 = 27
+            
     
 stdscr = curses.initscr() #initialize console
 height = 25
@@ -556,35 +577,51 @@ while key == -1:                #run program while [ESC] key is not pressed
     key = window.getch()  #get current key being pressed
 
     if key == 49:
-        paint_playgame(window)
-        paint_score(window)
-        paint_level(window)
-        window.refresh()
-        start_game(window)
-        key = -1
+        if player != "":
+            paint_playgame(window)
+            paint_score(window)
+            paint_level(window)
+            window.refresh()
+            start_game(window)
+            key = -1
+        else:
+            paint_nouser(window)
+            window.refresh()
+            start_nouser(window)
+            paint_menu(window)
+            window.refresh()
+            key = -1
 
     elif key == 50:     #Shows scoreboard
         paint_scoreboard(window)
         window.refresh()
         start_scoreboard(window)
+        paint_menu(window)
+        window.refresh()
         key = -1
 
     elif key == 51:   #Starts User selection
         paint_userselection(window)
         window.refresh()  
         start_userselection(window)
+        paint_menu(window)
+        window.refresh()
         key = -1
     
     elif key == 52: #Shows Reports Menu
         paint_reports(window)
         window.refresh()
         start_reports(window)
+        paint_menu(window)
+        window.refresh()
         key = -1
 
     elif key == 53:   #Starts Data Bulk
         paint_bulk(window)
         window.refresh()        
         start_bulk(window)
+        paint_menu(window)
+        window.refresh()
         key = -1
 
     elif key == 54:
