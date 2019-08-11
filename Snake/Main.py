@@ -360,6 +360,10 @@ def start_scoreboard(win):
 
 def start_userselection(win):
     global player
+    global newgame
+    global score
+    global scoretotal
+    global speed
     nodoaux = users.primero
     if nodoaux is not None:
         paint_username(win,str(nodoaux.dato))
@@ -379,6 +383,10 @@ def start_userselection(win):
             if key3 == 10:
                 if nodoaux is not None:
                     player = str(nodoaux.dato)
+                    scoretotal = 0
+                    score = 0    
+                    speed = 100
+                    newgame = True
                     key3 = 27          
     else:
         win.addstr(10,20,"No hay usuario(s) registrado(s)")
@@ -579,6 +587,10 @@ def start_gameover(win):
 
 def start_newuser(win):
     global player
+    global newgame
+    global score
+    global scoretotal
+    global speed
     newname = ""
     win2 = curses.newwin(1,20,9,15)
     tb = curses.textpad.Textbox(win2, insert_mode=True)
@@ -599,6 +611,10 @@ def start_newuser(win):
             if newname != "":
                 register_newname(newname)
                 player = newname
+                scoretotal = 0
+                score = 0    
+                speed = 100
+                newgame = True
             key8 = 27
 
 
