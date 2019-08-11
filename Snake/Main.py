@@ -283,7 +283,16 @@ def start_game(win): #Method to start game
         win.timeout(speed)
         keychange = window.getch()
         if keychange is not -1:
-            key1 = keychange
+            if keychange == KEY_RIGHT and key1 != KEY_LEFT:
+                key1 = keychange
+            if keychange == KEY_LEFT and key1 != KEY_RIGHT:
+                key1 = keychange
+            if keychange == KEY_UP and key1 != KEY_DOWN:
+                key1 = keychange
+            if keychange == KEY_DOWN and key1 != KEY_UP:
+                key1 = keychange
+            if keychange == 27:
+                key1 = keychange
         if key1 == KEY_RIGHT:
             heady = 0
             headx = 1
