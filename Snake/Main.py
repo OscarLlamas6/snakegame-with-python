@@ -11,7 +11,7 @@ import Stack
 from Stack import *
 import Queue
 from Queue import *
-from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER
+from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_ENTER, A_UNDERLINE
 
 player = "" #Variable que almacenara el username del jugador en turno, inicia como cadena vacia
 score = 0 #Contador del score por nivel
@@ -32,6 +32,7 @@ gameover = False
 nouser = False
 
 def bulk_csv(filename):
+    global users
     with open(filename, 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
         count = 0
@@ -39,7 +40,10 @@ def bulk_csv(filename):
             if count>0:                
                 users.agregar_final(line[0])
             count = count + 1
-           
+def register_newname(username):
+    global users
+    users.agregar_final(username)
+
 def paint_title(win,title):                     
     x_start = round((70-len(title))/2)    
     win.addstr(0,x_start,title)
@@ -124,6 +128,15 @@ def paint_scoreboard(win):
     paint_title(win,"Scoreboard")
     win.refresh()
 
+def paint_newuser(win):
+    win.clear()
+    win.border(0) 
+    paint_title(win,"NEW USERNAME")
+    win.addstr(5,18,"↓ Please enter your username (ID) ↓")
+    win.addstr(10,15,"________________________________________")
+    win.addstr(11,22,"Press ENTER to end typing")
+    win.refresh()
+    
 def paint_menu(win):
     win.clear()
     win.border(0) 
@@ -327,6 +340,20 @@ def start_game(win): #Method to start game
         paint_menu(win) 
 
 def start_scoreboard(win):
+    global sbqueue
+    if sbqueue.head is not None:
+        win.addstr(4,22,"Username", curses.A_UNDERLINE)
+        win.addstr(4,42,"Score", curses.A_UNDERLINE)
+        temp = sbqueue.head
+        row = 7
+        while temp is not None:
+            win.addstr(row,22,temp.username)
+            win.addstr(row,42,str(temp.score))
+            row+=1  
+            temp = temp.next
+        win.refresh()
+    else:
+        win.addstr(10,25,"¡No scores recorded!") 
     key2 = -1
     while key2!=27:
         key2 = window.getch()
@@ -549,16 +576,46 @@ def start_gameover(win):
     newgame = True
     paint_menu(win)
 
+
+def start_newuser(win):
+    global player
+    newname = ""
+    win2 = curses.newwin(1,20,9,15)
+    tb = curses.textpad.Textbox(win2, insert_mode=True)
+    text = tb.edit()
+    newname = tb.gather()
+    newname = newname[:-1]
+    win.refresh()
+    count = 22
+    while count <= 48:
+        win.addstr(11,count," ")
+        count = count + 1
+    win.addstr(23,5,"Press ESC to cancel  |  Press ENTER to register new username")
+    win.refresh()
+    key8 = -1
+    while key8!=27:
+        key8 = win.getch()
+        if key8 == 10:
+            if newname != "":
+                register_newname(newname)
+                player = newname
+            key8 = 27
+
+
 def start_nouser(win):
     key7 = -1
     while key7!=27:
         key7 = win.getch()
+        if key7 == 49:
+            paint_newuser(win)
+            win.refresh()
+            start_newuser(win)
+            key7 = 27
         if key7 == 50:
             paint_userselection(win)
             win.refresh()  
             start_userselection(win)
             key7 = 27
-            
     
 stdscr = curses.initscr() #initialize console
 height = 25
